@@ -1,21 +1,14 @@
 import React from 'react'
-import styled from 'styled-components'
-
-const HeaderWrapper = styled.div`
-  display: flex;
-  justify-content: space-between;
-  padding: 15px 60px;
-  background-color: #fdce4c;
-`
+import styles from './Header.module.scss'
 
 type Props = {}
 
 const Header: React.FC<Props> = () => {
   return (
-    <HeaderWrapper>
+    <div className={styles.wrapper}>
       <div>LOGO</div>
       <div>USER AVATAR</div>
-    </HeaderWrapper>
+    </div>
   )
 }
 

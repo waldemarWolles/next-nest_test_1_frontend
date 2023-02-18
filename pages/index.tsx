@@ -1,14 +1,18 @@
 import Head from 'next/head'
-import Image from 'next/image'
-import { Inter } from '@next/font/google'
 import styles from '@/styles/Home.module.css'
-import Header from '@/components/Header'
 import MainContent from '@/components/MainContent'
 import MainLayout from '@/layouts/MainLayout'
+import AuthForm from '@/components/AuthForm'
+import { NextPage } from 'next'
 
-const inter = Inter({ subsets: ['latin'] })
+const isAuth = false
+interface IHomeProps {
+  data: any
+}
 
-export default function Home() {
+const Home: NextPage<IHomeProps> = ({ data }) => {
+  console.log(data, 'HOME PAGE')
+
   return (
     <>
       <Head>
@@ -18,10 +22,10 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className={styles.main}>
-        <MainLayout>
-          <MainContent />
-        </MainLayout>
+        <MainLayout>{isAuth ? <MainContent /> : <AuthForm />}</MainLayout>
       </main>
     </>
   )
 }
+
+export default Home

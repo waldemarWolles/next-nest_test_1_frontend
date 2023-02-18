@@ -1,40 +1,61 @@
 /* eslint-disable @next/next/no-img-element */
-import { TextField } from '@mui/material'
-import Box from '@mui/material/Box'
+import { useAppDispatch } from '@/redux/hooks'
+import { setuserData } from '@/redux/slices/user'
+import { Api } from '@/services/api'
+import { ILoginDto } from '@/services/api/types'
+import { validationSchema } from '@/utils/validations'
+import { Tab, Tabs, TextField } from '@mui/material'
 import Button from '@mui/material/Button'
-import Typography from '@mui/material/Typography'
 import { useFormik } from 'formik'
-import Image from 'next/image'
+import { setCookie } from 'nookies'
 import React from 'react'
-import { object, string } from 'yup'
-import styles from './AuthForm..module.scss'
+import styles from './AuthForm.module.scss'
 
-type FormType = 'Register' | 'Log in'
+type FormType = 'register' | 'login'
 
 type Props = {}
 
-const validationSchema = object({
-  email: string().email('Enter a valid email').required('Email is required'),
-  password: string().min(8, 'Password should be of minimum 8 characters length').required('Password is required'),
-})
+interface IFormInputs {
+  email: string
+  password: string
+}
 
 const AuthForm: React.FC<Props> = () => {
-  const [formType, setFormType] = React.useState<FormType>('Register')
-  const formik = useFormik({
+  const dispatch = useAppDispatch()
+  const [formType, setFormType] = React.useState<FormType>('login')
+  const [errorMessage, setErrorMessage] = React.useState('')
+  const formik = useFormik<IFormInputs>({
     initialValues: {
       email: 'foobar@example.com',
       password: 'foobar',
-      formType: 'Register',
     },
     validationSchema: validationSchema,
-    onSubmit: (values) => {
-      alert(JSON.stringify(values, null, 2))
+    onSubmit: async (dto: ILoginDto) => {
+      try {
+        const data = await Api().user[formType](dto)
+        console.log(data)
+        setCookie(null, 'first_test_token', data.token, {
+          maxAge: 30 * 24 * 60 * 60,
+          path: '/',
+        })
+        setErrorMessage('')
+        dispatch(setuserData(data))
+        console.log(dto)
+      } catch (error: any) {
+        if (error.response) {
+          setErrorMessage(error.response.data.message)
+        }
+      }
     },
   })
 
   return (
     <div className={styles.wrapper}>
-      <h2 className={styles.title}>{formType} Form</h2>
+      <Tabs value={formType}>
+        <Tab onClick={() => setFormType('register')} label="Register" />
+        <Tab onClick={() => setFormType('login')} label="Login" />
+      </Tabs>
+      <h2 className={styles.title}>{[formType[0].toLocaleUpperCase(), formType.slice(1)].join('')} Form</h2>
       <form className={styles.formWrapper} onSubmit={formik.handleSubmit}>
         <TextField
           fullWidth
